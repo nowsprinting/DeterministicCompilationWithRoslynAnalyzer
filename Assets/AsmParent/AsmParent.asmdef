@@ -1,0 +1,16 @@
+{
+    "name": "AsmParent",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4d115baf5c5a64f28a9bf819f676cbfa"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
