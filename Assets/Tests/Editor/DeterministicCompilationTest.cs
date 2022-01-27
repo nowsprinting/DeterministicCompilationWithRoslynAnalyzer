@@ -2,7 +2,6 @@
 // This software is released under the MIT License.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -14,7 +13,8 @@ namespace Tests
 {
     public class DeterministicCompilationTest
     {
-        private readonly HashSet<string> _compilationAssemblies = new HashSet<string>();
+        private static string RecompiledAssembliesList => Path.GetFullPath("Temp/RecompiledAssembliesList.txt");
+        // Note: Persist to file because domain reloads in test.
 
         [SetUp]
         public void SetUp()
@@ -31,13 +31,15 @@ namespace Tests
         private void OnAssemblyCompilationFinished(string assemblyPath, CompilerMessage[] messages)
         {
             var assemblyName = Regex.Match(assemblyPath, "Library/ScriptAssemblies/(.+)\\.dll").Groups[1].Value;
-            _compilationAssemblies.Add(assemblyName);
+            File.AppendAllText(RecompiledAssembliesList, $"{assemblyName}\n");
             Debug.Log($"Recompiled {assemblyName}");
         }
 
         [UnityTest]
         public IEnumerator RecompileChild_ModPrivate_ParentAndGrandchildIsNotRecompile()
         {
+            File.Delete(RecompiledAssembliesList);
+
             const string CompilationCountPattern = "CompilationCount(\\d+)";
             var path = Path.GetFullPath("Assets/AsmChild/Child.cs");
             var source = File.ReadAllText(path);
@@ -47,14 +49,12 @@ namespace Tests
                 $"CompilationCount{newCompilationCount}");
             File.WriteAllText(path, newSource);
 
-            // AssetDatabase.Refresh();
             yield return new RecompileScripts();
-            // TODO: ここでreloadが走るため、たとえstaticにしても_compilationAssembliesはクリアされる
-            // おそらく同梱の理由で、コンパイル時のエラーログで失敗されることもLogAssert.Expectも無効
 
-            Assert.That(_compilationAssemblies, Does.Contain("AsmChild"));
-            Assert.That(_compilationAssemblies, Does.Not.Contain("AsmParent"));
-            Assert.That(_compilationAssemblies, Does.Not.Contain("AsmGrandchild"));
+            var recompiledAssemblies = File.ReadAllLines(RecompiledAssembliesList);
+            Assert.That(recompiledAssemblies, Does.Contain("AsmChild"));
+            Assert.That(recompiledAssemblies, Does.Not.Contain("AsmParent"));
+            Assert.That(recompiledAssemblies, Does.Not.Contain("AsmGrandchild"));
         }
     }
 }
