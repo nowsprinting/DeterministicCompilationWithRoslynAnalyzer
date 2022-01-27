@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - use_asmdef_references
     paths-ignore:
       - '**.md'
   pull_request:
