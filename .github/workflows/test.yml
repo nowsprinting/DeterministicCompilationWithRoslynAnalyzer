@@ -50,6 +50,7 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           unityVersion: ${{ matrix.unityVersion }}  # 通常は未指定（`auto`）でok
+          testMode: EditMode
           artifactsPath: Logs
         env:
           UNITY_LICENSE: ${{ secrets[steps.license.outputs.secret_key] }}
